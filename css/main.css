@@ -1,0 +1,13 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+#game {
+  margin-top: 15px;
+}
+
+canvas {
+  display: block;
+  margin: auto;
+}
