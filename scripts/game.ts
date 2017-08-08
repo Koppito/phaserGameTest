@@ -1,4 +1,5 @@
-﻿/// <reference path="../phaserTypescript/phaser.d.ts" />
+﻿/// <reference path="phaserTypescript/phaser.d.ts" />
+
 var carpetaAssets: String = "assets/";
 
 window.onload = () => {
@@ -107,7 +108,7 @@ class Game {
 
 }
 
-interface iGameObject {
+interface iGameObject{
   sprite: Phaser.Sprite;
   game: Phaser.Game;
   start(): void;
@@ -175,11 +176,14 @@ class Player implements iGameObject{
     if (this.game.input.activePointer.isDown) {
       this.gun.shoot();
     }
-    if (this.gun.projectile != null)
-      this.gun.projectile.update();
+    for (let p of this.gun.projectiles) {
+      p.update();
+    }
   }
 
-  setPlatformGroup(_platform: Phaser.Group): void { this.platformGroup = _platform; }
+  setPlatformGroup(_platform: Phaser.Group): void {
+    this.platformGroup = _platform;
+  }
   setArmSprite(_sprite: Phaser.Sprite): void {
     this.armSprite = _sprite;
     this.sprite.addChild(this.armSprite);
@@ -194,7 +198,7 @@ class Player implements iGameObject{
 class Gun implements iGameObject {
   game: Phaser.Game;
   sprite: Phaser.Sprite;
-  projectile: Projectile;
+  projectiles: Projectile[] = [];
   player: Player;
   nextShotTime: number = 0;
   msBetweenShots: number = 100.0;
@@ -210,13 +214,12 @@ class Gun implements iGameObject {
   shoot() {
     if (this.game.time.now > this.nextShotTime) {
       this.nextShotTime = this.game.time.now + this.msBetweenShots;
-      this.projectile = new Projectile(this.game, this.game.add.sprite(
+      this.projectiles.push(new Projectile(this.game, this.game.add.sprite(
         this.player.armSprite.worldPosition.x + this.game.camera.position.x,
         this.player.armSprite.worldPosition.y + this.game.camera.position.y,
         "bullet"),
-        this);
-      this.projectile.start();
-      this.projectile.update();
+        this));
+      console.log(this.projectiles);
     }
   }
 }
@@ -233,17 +236,17 @@ class Projectile implements iGameObject  {
   }
 
   start(): void {
-    // this.game.time.events.add(Phaser.Timer.SECOND * 1.5,
-    //   this.game.destroy
-    // );
+
   }
 
   update(): void {
     this.sprite.position.x += 10;
-  }
-
-  gritar() {
-    console.log("AAAAAAAA");
+    if (!this.sprite.inCamera) {
+      this.sprite.destroy(false);
+      let index = this.gun.projectiles.indexOf(this, 0);
+      if (index > -1)
+        this.gun.projectiles.splice(index, 1);
+    }
   }
 
 }

@@ -4,6 +4,7 @@
     <meta charset="utf-8"/>
     <title>Game Test - Phaser</title>
     <link rel="stylesheet" href="css/main.css">
+    <script type="text/javascript" src="scripts/phaser.js"></script>
     <script type="text/javascript" src="scripts/game.js"></script>
   </head>
 

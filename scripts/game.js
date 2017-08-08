@@ -1,4 +1,4 @@
-/// <reference path="../phaserTypescript/phaser.d.ts" />
+/// <reference path="phaserTypescript/phaser.d.ts" />
 var carpetaAssets = "assets/";
 window.onload = function () {
     var game = new Game();
@@ -137,10 +137,14 @@ var Player = (function () {
         if (this.game.input.activePointer.isDown) {
             this.gun.shoot();
         }
-        if (this.gun.projectile != null)
-            this.gun.projectile.update();
+        for (var _i = 0, _a = this.gun.projectiles; _i < _a.length; _i++) {
+            var p = _a[_i];
+            p.update();
+        }
     };
-    Player.prototype.setPlatformGroup = function (_platform) { this.platformGroup = _platform; };
+    Player.prototype.setPlatformGroup = function (_platform) {
+        this.platformGroup = _platform;
+    };
     Player.prototype.setArmSprite = function (_sprite) {
         this.armSprite = _sprite;
         this.sprite.addChild(this.armSprite);
@@ -153,6 +157,7 @@ var Player = (function () {
 }());
 var Gun = (function () {
     function Gun(_game, _player) {
+        this.projectiles = [];
         this.nextShotTime = 0;
         this.msBetweenShots = 100.0;
         this.game = _game;
@@ -163,9 +168,8 @@ var Gun = (function () {
     Gun.prototype.shoot = function () {
         if (this.game.time.now > this.nextShotTime) {
             this.nextShotTime = this.game.time.now + this.msBetweenShots;
-            this.projectile = new Projectile(this.game, this.game.add.sprite(this.player.armSprite.worldPosition.x + this.game.camera.position.x, this.player.armSprite.worldPosition.y + this.game.camera.position.y, "bullet"), this);
-            this.projectile.start();
-            this.projectile.update();
+            this.projectiles.push(new Projectile(this.game, this.game.add.sprite(this.player.armSprite.worldPosition.x + this.game.camera.position.x, this.player.armSprite.worldPosition.y + this.game.camera.position.y, "bullet"), this));
+            console.log(this.projectiles);
         }
     };
     return Gun;
@@ -177,15 +181,15 @@ var Projectile = (function () {
         this.gun = _gun;
     }
     Projectile.prototype.start = function () {
-        // this.game.time.events.add(Phaser.Timer.SECOND * 1.5,
-        //   this.game.destroy
-        // );
     };
     Projectile.prototype.update = function () {
         this.sprite.position.x += 10;
-    };
-    Projectile.prototype.gritar = function () {
-        console.log("AAAAAAAA");
+        if (!this.sprite.inCamera) {
+            this.sprite.destroy(false);
+            var index = this.gun.projectiles.indexOf(this, 0);
+            if (index > -1)
+                this.gun.projectiles.splice(index, 1);
+        }
     };
     return Projectile;
 }());
